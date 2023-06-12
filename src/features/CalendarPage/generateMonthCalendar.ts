@@ -1,5 +1,4 @@
 import moment, { Moment } from 'moment'
-
 const generateMonthCalendar = (date: Moment) => {
   const calendar: string[][] = []
 
