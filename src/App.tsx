@@ -2,13 +2,13 @@ import React from 'react'
 
 import { CalendarTheme } from './theme/theme'
 import { TasksProvider } from './context/tasksContext'
-import Calendar from './features/Calendar'
+import CalendarPage from './features/CalendarPage'
 
 function App() {
   return (
     <TasksProvider>
       <CalendarTheme>
-        <Calendar />
+        <CalendarPage />
       </CalendarTheme>
     </TasksProvider>
   )

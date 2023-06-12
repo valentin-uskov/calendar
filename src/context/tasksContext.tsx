@@ -1,16 +1,16 @@
 import React, { FC, useContext, useState } from 'react'
-import { Task } from '../models'
+import { Filters, Task, Tasks } from '../models'
 import mockData from '../data/mock-data'
 
 interface TasksContext {
   tasks: Record<string, Task[]>
-  updateTasks: React.Dispatch<React.SetStateAction<Record<string, Task[]>>>
+  updateTasks: React.Dispatch<React.SetStateAction<Tasks>>
   changingTask: Task | null
   updateChangingTask: React.Dispatch<React.SetStateAction<Task | null>>
   changingDate: string | null
   updateChangingDate: React.Dispatch<React.SetStateAction<string | null>>
-  isTaskModalOpen: boolean
-  updateIsTaskModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  tasksFilters: Filters
+  updateTasksFilters: React.Dispatch<React.SetStateAction<Filters>>
 }
 
 const TasksContext = React.createContext<TasksContext>({} as TasksContext)
@@ -20,10 +20,10 @@ interface Props {
 }
 
 export const TasksProvider: FC<Props> = ({ children }) => {
-  const [tasks, setTasks] = useState<Record<string, Task[]>>(mockData as Record<string, Task[]>)
-  const [changingTask, setchangingTask] = useState<Task | null>(null)
+  const [tasks, setTasks] = useState<Tasks>(mockData as Record<string, Task[]>)
+  const [changingTask, setChangingTask] = useState<Task | null>(null)
   const [changingDate, setDraggedDate] = useState<string | null>(null)
-  const [isTaskModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [tasksFilters, setTasksFilters] = useState<Filters>({ text: '', colors: [] })
 
   return (
     <TasksContext.Provider
@@ -31,11 +31,11 @@ export const TasksProvider: FC<Props> = ({ children }) => {
         tasks,
         updateTasks: setTasks,
         changingTask,
-        updateChangingTask: setchangingTask,
+        updateChangingTask: setChangingTask,
         changingDate,
         updateChangingDate: setDraggedDate,
-        isTaskModalOpen,
-        updateIsTaskModalOpen: setIsModalOpen,
+        tasksFilters,
+        updateTasksFilters: setTasksFilters,
       }}
     >
       {children}
@@ -51,8 +51,8 @@ export const useTasks = () => {
     updateChangingTask,
     changingDate,
     updateChangingDate,
-    isTaskModalOpen,
-    updateIsTaskModalOpen,
+    tasksFilters,
+    updateTasksFilters,
   } = useContext(TasksContext)
   return {
     tasks,
@@ -61,7 +61,7 @@ export const useTasks = () => {
     updateChangingTask,
     changingDate,
     updateChangingDate,
-    isTaskModalOpen,
-    updateIsTaskModalOpen,
+    tasksFilters,
+    updateTasksFilters,
   }
 }

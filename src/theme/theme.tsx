@@ -1,6 +1,6 @@
 import { Theme, ThemeProvider, Global, css } from '@emotion/react'
 import React, { FC, ReactNode } from 'react'
-import { SPACINGS } from '../constants/'
+import { SPACINGS } from '../theme/spacings'
 
 const theme: Theme = {
   fontColor: { primary: '#242328', secondary: '#7b7b7b' },

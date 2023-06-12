@@ -1,12 +1,12 @@
 import React, { FC, useMemo } from 'react'
 import styled from '@emotion/styled'
-import moment from 'moment'
 
-import { useTasks } from '../../context/tasksContext'
-import TaskItem from '../TaskItem'
 import { Task } from '../../models'
 import { Holiday } from '../../api/models'
-import { SPACINGS } from '../../constants/'
+import { SPACINGS } from '../../theme/spacings'
+import { useTasks } from '../../context/tasksContext'
+import TaskItem from '../../components/TaskItem'
+import formatCellDate from './formatCellDate'
 
 type StyledCellProps = {
   isExtraDay: boolean
@@ -58,66 +58,42 @@ const StyledHoliday = styled.div`
 `
 
 type Props = {
+  cellTasks: Task[]
   isExtraDay: boolean
   date: string
-  filterText: string
-  filterColors: string[]
   holidays: Holiday[]
+  onCellClick: (date: string) => void
+  onTaskClick: (task: Task, date: string) => void
 }
 
-const CalendarCell: FC<Props> = ({ isExtraDay, date, filterText, filterColors, holidays }) => {
-  const {
-    tasks,
-    updateTasks,
-    changingTask,
-    updateChangingTask,
-    changingDate,
-    updateChangingDate,
-    updateIsTaskModalOpen,
-  } = useTasks()
+const CalendarCell: FC<Props> = ({ cellTasks, isExtraDay, date, holidays, onCellClick, onTaskClick }) => {
+  const { tasks, updateTasks, changingTask, updateChangingTask, changingDate, updateChangingDate } = useTasks()
 
-  const filteredTasks = useMemo(
-    () =>
-      tasks[date]?.filter(
-        (task) =>
-          task.text.toLowerCase().includes(filterText.toLowerCase()) &&
-          (filterColors.length ? task.colors.some((color) => filterColors.includes(color)) : true),
-      ) || [],
-    [tasks, filterText, filterColors],
-  )
+  const cellDate = useMemo(() => formatCellDate(date), [date])
 
-  const cellDate = useMemo(
-    () =>
-      moment(date).startOf('day').isSame(moment(date).startOf('month')) ||
-      moment(date).endOf('day').isSame(moment(date).endOf('month'))
-        ? moment(date).format('MMM D')
-        : moment(date).format('D'),
-    [date],
-  )
-
-  function handleDragOver(event: React.DragEvent<HTMLDivElement>) {
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault()
     event.stopPropagation()
     const target = event.currentTarget as HTMLElement
     target.style.boxShadow = '0 0 8px #515151'
   }
 
-  function handleDragLeave(event: React.DragEvent<HTMLDivElement>) {
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     const target = event.currentTarget as HTMLElement
     target.style.boxShadow = 'none'
   }
 
-  function handleDragStart(event: React.DragEvent<HTMLDivElement>, task: Task) {
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, task: Task) => {
     updateChangingDate(date)
     updateChangingTask(task)
   }
 
-  function handleDragEnd(event: React.DragEvent<HTMLDivElement>) {
+  const handleDragEnd = (event: React.DragEvent<HTMLDivElement>) => {
     const target = event.currentTarget as HTMLElement
     target.style.boxShadow = 'none'
   }
 
-  function handleDrop(event: React.DragEvent<HTMLDivElement>, task: Task | null) {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>, task: Task | null) => {
     event.preventDefault()
     event.stopPropagation()
     const target = event.currentTarget as HTMLElement
@@ -162,61 +138,48 @@ const CalendarCell: FC<Props> = ({ isExtraDay, date, filterText, filterColors, h
     }
   }
 
-  function handleDragOverCell(event: React.DragEvent<HTMLDivElement>) {
+  const handleDragOverCell = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault()
     event.stopPropagation()
     const target = event.currentTarget as HTMLElement
     target.style.boxShadow = '0 0 8px #515151'
   }
 
-  function handleDragLeaveCell(event: React.DragEvent<HTMLDivElement>) {
+  const handleDragLeaveCell = (event: React.DragEvent<HTMLDivElement>) => {
     const target = event.currentTarget as HTMLElement
     target.style.boxShadow = 'none'
   }
 
-  const handleClickCell = () => {
-    updateIsTaskModalOpen(true)
-    updateChangingDate(date)
-  }
-
-  const handleClickTask = (task: Task) => {
-    updateIsTaskModalOpen(true)
-    updateChangingDate(date)
-    updateChangingTask(task)
-  }
-
   return (
-    <>
-      <StyledCell isExtraDay={isExtraDay} onClick={handleClickCell}>
-        <div
-          onDragLeave={(event) => handleDragLeaveCell(event)}
-          onDragOver={(event) => handleDragOverCell(event)}
-          onDrop={(event) => handleDropCell(event)}
-        >
-          <span>{cellDate}</span>
-          {!!filteredTasks?.length && <span>{filteredTasks.length} card</span>}
+    <StyledCell isExtraDay={isExtraDay} onClick={() => onCellClick(date)}>
+      <div
+        onDragLeave={(event) => handleDragLeaveCell(event)}
+        onDragOver={(event) => handleDragOverCell(event)}
+        onDrop={(event) => handleDropCell(event)}
+      >
+        <span>{cellDate}</span>
+        {!!cellTasks?.length && <span>{cellTasks.length} card</span>}
 
-          {holidays.map((holiday, index) => (
-            <StyledHoliday key={index}>{holiday.name}</StyledHoliday>
-          ))}
+        {holidays.map((holiday, index) => (
+          <StyledHoliday key={index}>{holiday.name}</StyledHoliday>
+        ))}
 
-          {filteredTasks.map((task) => (
-            <div
-              key={task.id}
-              draggable={true}
-              onDragOver={(event) => handleDragOver(event)}
-              onDragLeave={(event) => handleDragLeave(event)}
-              onDragStart={(event) => handleDragStart(event, task)}
-              onDragEnd={(event) => handleDragEnd(event)}
-              onDrop={(event) => handleDrop(event, task)}
-              onClick={() => handleClickTask(task)}
-            >
-              <TaskItem text={task.text} colors={task.colors} />
-            </div>
-          ))}
-        </div>
-      </StyledCell>
-    </>
+        {cellTasks.map((task) => (
+          <div
+            key={task.id}
+            draggable={true}
+            onDragOver={(event) => handleDragOver(event)}
+            onDragLeave={(event) => handleDragLeave(event)}
+            onDragStart={(event) => handleDragStart(event, task)}
+            onDragEnd={(event) => handleDragEnd(event)}
+            onDrop={(event) => handleDrop(event, task)}
+            onClick={() => onTaskClick(task, date)}
+          >
+            <TaskItem text={task.text} colors={task.colors} />
+          </div>
+        ))}
+      </div>
+    </StyledCell>
   )
 }
 

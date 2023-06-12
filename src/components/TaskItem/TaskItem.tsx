@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
-import { SPACINGS } from '../../constants/'
+import { SPACINGS } from '../../theme/spacings'
 
 const StyledTaskItem = styled.div`
   background-color: #ffffff;

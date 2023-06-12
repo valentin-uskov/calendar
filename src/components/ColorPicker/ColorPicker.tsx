@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import styled from '@emotion/styled'
-import { colors as availableColors } from '../../constants'
+import { colors as availableColors } from '../../theme/colors'
 import { Color } from '../../models'
 
 const StyledColorPicker = styled.div`
